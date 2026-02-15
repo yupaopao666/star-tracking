@@ -149,17 +149,35 @@
 
     // Default categories
     const DEFAULT_CATEGORIES = [
-      { id: 'homework', name: 'Homework', color: '#FF6B9D', emoji: '📚' },
-      { id: 'chores', name: 'Chores', color: '#4ECDC4', emoji: '🧹' },
-      { id: 'kindness', name: 'Kindness', color: '#FFE66D', emoji: '💝' },
-      { id: 'reading', name: 'Reading', color: '#A8DADC', emoji: '📖' },
-      { id: 'behavior', name: 'Good Behavior', color: '#F4A261', emoji: '😊' }
+      { id: 'homework', name: 'Homework', color: '#FF6B9D', emoji: '📚', forKid: 'all' },
+      { id: 'room-cleanup', name: 'Room Cleanup', color: '#4ECDC4', emoji: '🧹', forKid: 'all' },
+      { id: 'table-manners', name: 'Table Manners', color: '#FFE66D', emoji: '🍽️', forKid: 'all' },
+      { id: 'speak-kindly', name: 'Speak Kindly', color: '#A8DADC', emoji: '💬', forKid: 'all' },
+      { id: 'sibling-kindness', name: 'Kind to Sibling', color: '#F4A261', emoji: '🤝', forKid: 'all' },
+      { id: 'school-behavior', name: 'School Behavior', color: '#95E1D3', emoji: '🎒', forKid: 'all' },
+      { id: 'reading', name: 'Reading', color: '#C7CEEA', emoji: '📖', forKid: 'all' },
+      { id: 'no-candy', name: 'No Candy Today', color: '#FFA8B8', emoji: '🚫🍬', forKid: 'all' },
+      { id: 'practice-violin', name: 'Practice Violin', color: '#DDA5E8', emoji: '🎻', forKid: 'kid1' },
+      { id: 'practice-piano', name: 'Practice Piano', color: '#89CFF0', emoji: '🎹', forKid: 'kid2' },
+      { id: 'online-courses', name: 'Online Class Behavior', color: '#B4E7CE', emoji: '💻', forKid: 'kid2' }
     ];
 
     // Icon Components
     const Star = ({ className, filled = false }) => (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className} fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+      </svg>
+    );
+
+    const HalfStar = ({ className }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className}>
+        <defs>
+          <linearGradient id="half-star">
+            <stop offset="50%" stopColor="currentColor" />
+            <stop offset="50%" stopColor="transparent" />
+          </linearGradient>
+        </defs>
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="url(#half-star)" stroke="currentColor" strokeWidth="2"/>
       </svg>
     );
 
@@ -190,6 +208,24 @@
     const ChevronRight = ({ className }) => (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={className}>
         <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    );
+
+    const Settings = ({ className }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+        <circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m5.2-13.2l-1.4 1.4M6.8 14.8l-1.4 1.4m9.2 1.4l-1.4-1.4M6.8 9.2L5.4 7.8m12.6 7l-6-2m-6-2l-6 2"/>
+      </svg>
+    );
+
+    const Gift = ({ className }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+        <polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+      </svg>
+    );
+
+    const Award = ({ className }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+        <circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
       </svg>
     );
 
@@ -298,7 +334,19 @@
       const [showCategoryModal, setShowCategoryModal] = useState(false);
       const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
       const [newCategoryName, setNewCategoryName] = useState('');
+      const [newCategoryForKid, setNewCategoryForKid] = useState('all'); // 'all', 'kid1', or 'kid2'
       const [isLoading, setIsLoading] = useState(true);
+      const [showEditKidModal, setShowEditKidModal] = useState(false);
+      const [editingKid, setEditingKid] = useState(null);
+      const [editKidName, setEditKidName] = useState('');
+      const [editKidAvatar, setEditKidAvatar] = useState('');
+      const [showRewardsModal, setShowRewardsModal] = useState(false);
+      const [showRedemptionModal, setShowRedemptionModal] = useState(false);
+      const [starsPerCertificate, setStarsPerCertificate] = useState(50);
+      const [starsPerDiamond, setStarsPerDiamond] = useState(100);
+      const [rewards, setRewards] = useState({}); // { kid1: { certificates: 2, diamonds: 1 } }
+      const [showManageCategoriesModal, setShowManageCategoriesModal] = useState(false);
+      const [categorySettings, setCategorySettings] = useState({}); // { kid1: { homework: true, chores: false }, kid2: { ... } }
 
       const dataRef = firebase.database().ref(`users/${user.uid}/starTracker`);
 
@@ -308,7 +356,21 @@
           if (data) {
             if (data.kids) setKids(data.kids);
             if (data.stars) setStars(data.stars);
-            if (data.categories) setCategories(data.categories);
+            
+            // Always include default categories, plus any custom ones from Firebase
+            if (data.categories) {
+              const customCategories = data.categories.filter(
+                cat => !DEFAULT_CATEGORIES.some(def => def.id === cat.id)
+              );
+              setCategories([...DEFAULT_CATEGORIES, ...customCategories]);
+            } else {
+              setCategories(DEFAULT_CATEGORIES);
+            }
+            
+            if (data.rewards) setRewards(data.rewards);
+            if (data.starsPerCertificate) setStarsPerCertificate(data.starsPerCertificate);
+            if (data.starsPerDiamond) setStarsPerDiamond(data.starsPerDiamond);
+            if (data.categorySettings) setCategorySettings(data.categorySettings);
           }
           setIsLoading(false);
         }, (error) => {
@@ -323,14 +385,23 @@
         if (!isLoading) {
           saveToFirebase();
         }
-      }, [kids, stars, categories]);
+      }, [kids, stars, categories, rewards, starsPerCertificate, starsPerDiamond, categorySettings]);
 
       const saveToFirebase = async () => {
         try {
+          // Only save custom categories (not default ones)
+          const customCategories = categories.filter(
+            cat => !DEFAULT_CATEGORIES.some(def => def.id === cat.id)
+          );
+          
           await dataRef.set({
             kids,
             stars,
-            categories,
+            categories: customCategories,
+            rewards,
+            starsPerCertificate,
+            starsPerDiamond,
+            categorySettings,
             lastModified: new Date().toISOString()
           });
         } catch (error) {
@@ -344,10 +415,15 @@
         if (!newStars[kidId][date]) newStars[kidId][date] = {};
         
         const currentValue = newStars[kidId][date][categoryId];
-        newStars[kidId][date][categoryId] = !currentValue;
         
+        // Cycle: undefined/false → 0.5 → 1 → undefined/false
         if (!currentValue) {
+          newStars[kidId][date][categoryId] = 0.5;
+        } else if (currentValue === 0.5) {
+          newStars[kidId][date][categoryId] = 1;
           createConfetti();
+        } else {
+          newStars[kidId][date][categoryId] = false;
         }
         
         setStars(newStars);
@@ -356,26 +432,130 @@
       const addCustomCategory = () => {
         if (!newCategoryName.trim()) return;
         
-        const colors = ['#FF6B9D', '#4ECDC4', '#FFE66D', '#A8DADC', '#F4A261', '#95E1D3'];
-        const emojis = ['🎨', '⚽', '🎵', '🎯', '🏆', '🌟', '💪', '🎉'];
+        const colors = ['#FF6B9D', '#4ECDC4', '#FFE66D', '#A8DADC', '#F4A261', '#95E1D3', '#C7CEEA', '#FFA8B8', '#DDA5E8', '#89CFF0', '#B4E7CE'];
+        const emojis = ['🎨', '⚽', '🎵', '🎯', '🏆', '🌟', '💪', '🎉', '🎮', '🧘', '🎭', '🏃', '🎸', '🥋', '🎪'];
         
         const newCategory = {
           id: `custom_${Date.now()}`,
           name: newCategoryName,
           color: colors[Math.floor(Math.random() * colors.length)],
-          emoji: emojis[Math.floor(Math.random() * emojis.length)]
+          emoji: emojis[Math.floor(Math.random() * emojis.length)],
+          forKid: newCategoryForKid
         };
         
         setCategories([...categories, newCategory]);
         setNewCategoryName('');
+        setNewCategoryForKid('all');
       };
 
       const deleteCategory = (categoryId) => {
+        // Check if it's a built-in default category
         if (DEFAULT_CATEGORIES.some(c => c.id === categoryId)) {
-          alert("Can't delete default categories!");
+          alert("Can't delete built-in categories! Use 'Manage Categories' to disable them instead.");
           return;
         }
+        // Delete custom category
         setCategories(categories.filter(c => c.id !== categoryId));
+      };
+
+      const saveKidEdit = () => {
+        if (!editKidName.trim()) return;
+        
+        const updatedKids = kids.map(k => 
+          k.id === editingKid.id 
+            ? { ...k, name: editKidName, avatar: editKidAvatar }
+            : k
+        );
+        
+        setKids(updatedKids);
+        setShowEditKidModal(false);
+        setEditingKid(null);
+        setEditKidName('');
+        setEditKidAvatar('');
+      };
+
+      const openEditKidModal = (kid) => {
+        setEditingKid(kid);
+        setEditKidName(kid.name);
+        setEditKidAvatar(kid.avatar);
+        setShowEditKidModal(true);
+      };
+
+      const isCategoryEnabledForKid = (categoryId, kidId) => {
+        // If no settings exist, all default categories are enabled by default
+        if (!categorySettings[kidId]) return true;
+        // If setting exists, use it; otherwise default to true
+        return categorySettings[kidId][categoryId] !== false;
+      };
+
+      const toggleCategoryForKid = (categoryId, kidId) => {
+        const newSettings = { ...categorySettings };
+        if (!newSettings[kidId]) newSettings[kidId] = {};
+        
+        // Toggle the setting
+        newSettings[kidId][categoryId] = !isCategoryEnabledForKid(categoryId, kidId);
+        
+        setCategorySettings(newSettings);
+      };
+
+      const redeemReward = (kidId, rewardType) => {
+        const stats = getStarsForKid(kidId);
+        const cost = rewardType === 'certificate' ? starsPerCertificate : starsPerDiamond;
+        
+        if (stats.total < cost) {
+          alert(`Not enough stars! Need ${cost} stars, but only have ${stats.total.toFixed(1)} stars.`);
+          return;
+        }
+
+        // Deduct stars from the most recent dates first
+        const newStars = { ...stars };
+        if (!newStars[kidId]) return;
+        
+        let starsToDeduct = cost;
+        const dates = Object.keys(newStars[kidId]).sort().reverse(); // Most recent first
+        
+        for (const date of dates) {
+          if (starsToDeduct <= 0) break;
+          
+          const categories = Object.keys(newStars[kidId][date]);
+          for (const category of categories) {
+            if (starsToDeduct <= 0) break;
+            
+            const currentValue = newStars[kidId][date][category];
+            if (currentValue) {
+              const starValue = currentValue === 0.5 ? 0.5 : 1;
+              
+              if (starsToDeduct >= starValue) {
+                // Remove the entire star
+                newStars[kidId][date][category] = false;
+                starsToDeduct -= starValue;
+              } else {
+                // Convert full star to half star if we only need 0.5 more
+                if (currentValue === 1 && starsToDeduct === 0.5) {
+                  newStars[kidId][date][category] = 0.5;
+                  starsToDeduct = 0;
+                }
+              }
+            }
+          }
+        }
+        
+        // Add reward
+        const newRewards = { ...rewards };
+        if (!newRewards[kidId]) {
+          newRewards[kidId] = { certificates: 0, diamonds: 0 };
+        }
+        
+        if (rewardType === 'certificate') {
+          newRewards[kidId].certificates = (newRewards[kidId].certificates || 0) + 1;
+        } else {
+          newRewards[kidId].diamonds = (newRewards[kidId].diamonds || 0) + 1;
+        }
+        
+        setStars(newStars);
+        setRewards(newRewards);
+        createConfetti();
+        alert(`🎉 Redeemed 1 ${rewardType}!`);
       };
 
       const getStarsForKid = (kidId) => {
@@ -391,7 +571,12 @@
         let thisWeekCount = 0;
         
         Object.entries(stars[kidId]).forEach(([date, cats]) => {
-          const count = Object.values(cats).filter(Boolean).length;
+          const count = Object.values(cats).reduce((sum, val) => {
+            if (val === 0.5) return sum + 0.5;
+            if (val === 1 || val === true) return sum + 1;
+            return sum;
+          }, 0);
+          
           total += count;
           if (date === today) todayCount += count;
           if (date >= weekStart) thisWeekCount += count;
@@ -415,7 +600,11 @@
 
       const getStarsForDate = (kidId, date) => {
         if (!stars[kidId] || !stars[kidId][date]) return 0;
-        return Object.values(stars[kidId][date]).filter(Boolean).length;
+        return Object.values(stars[kidId][date]).reduce((sum, val) => {
+          if (val === 0.5) return sum + 0.5;
+          if (val === 1 || val === true) return sum + 1;
+          return sum;
+        }, 0);
       };
 
       if (isLoading) {
@@ -439,6 +628,14 @@
                   ⭐ Star Tracker
                 </h1>
                 <p className="text-white text-xl opacity-90">Choose a kid to track stars</p>
+                
+                <button
+                  onClick={() => setShowRewardsModal(true)}
+                  className="mt-4 px-6 py-3 bg-white rounded-2xl font-semibold text-purple-600 hover:bg-gray-100 transition-all flex items-center gap-2 mx-auto shadow-lg"
+                >
+                  <Settings className="w-5 h-5" />
+                  Rewards Settings
+                </button>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
@@ -447,10 +644,19 @@
                   return (
                     <div
                       key={kid.id}
-                      onClick={() => setSelectedKid(kid)}
-                      className="kid-card bg-white rounded-3xl p-8 shadow-2xl"
+                      className="kid-card bg-white rounded-3xl p-8 shadow-2xl relative"
                     >
-                      <div className="text-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditKidModal(kid);
+                        }}
+                        className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                      >
+                        <Settings className="w-5 h-5 text-gray-600" />
+                      </button>
+                      
+                      <div className="text-center" onClick={() => setSelectedKid(kid)} style={{ cursor: 'pointer' }}>
                         <div className="text-8xl mb-4">{kid.avatar}</div>
                         <h2 className="text-4xl font-bold mb-6" style={{ 
                           fontFamily: "'Fredoka', sans-serif",
@@ -464,18 +670,37 @@
                             <div className="text-gray-600 text-sm font-semibold mb-1">Total Stars</div>
                             <div className="text-4xl font-bold flex items-center justify-center gap-2" style={{ color: kid.color }}>
                               <Star className="w-10 h-10" filled />
-                              {stats.total}
+                              {stats.total % 1 === 0 ? stats.total : stats.total.toFixed(1)}
                             </div>
                           </div>
                           
                           <div className="grid grid-cols-2 gap-4">
                             <div className="bg-blue-50 rounded-2xl p-4">
                               <div className="text-gray-600 text-xs font-semibold mb-1">Today</div>
-                              <div className="text-2xl font-bold text-blue-600">{stats.today}</div>
+                              <div className="text-2xl font-bold text-blue-600">
+                                {stats.today % 1 === 0 ? stats.today : stats.today.toFixed(1)}
+                              </div>
                             </div>
                             <div className="bg-purple-50 rounded-2xl p-4">
                               <div className="text-gray-600 text-xs font-semibold mb-1">This Week</div>
-                              <div className="text-2xl font-bold text-purple-600">{stats.thisWeek}</div>
+                              <div className="text-2xl font-bold text-purple-600">
+                                {stats.thisWeek % 1 === 0 ? stats.thisWeek : stats.thisWeek.toFixed(1)}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4 pt-2">
+                            <div className="bg-green-50 rounded-2xl p-3 border-2 border-green-200">
+                              <div className="text-green-700 text-xs font-semibold mb-1">📜 Certificates</div>
+                              <div className="text-3xl font-bold text-green-600">
+                                {rewards[kid.id]?.certificates || 0}
+                              </div>
+                            </div>
+                            <div className="bg-pink-50 rounded-2xl p-3 border-2 border-pink-200">
+                              <div className="text-pink-700 text-xs font-semibold mb-1">💎 Diamonds</div>
+                              <div className="text-3xl font-bold text-pink-600">
+                                {rewards[kid.id]?.diamonds || 0}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -515,11 +740,17 @@
                   </h2>
                 </div>
                 
-                <div className="w-20"></div>
+                <button
+                  onClick={() => setShowManageCategoriesModal(true)}
+                  className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                  title="Manage Categories"
+                >
+                  <Settings className="w-6 h-6 text-gray-600" />
+                </button>
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-4 mb-4">
                 {(() => {
                   const stats = getStarsForKid(selectedKid.id);
                   return (
@@ -528,21 +759,58 @@
                         <div className="text-sm font-semibold text-gray-700 mb-1">Total</div>
                         <div className="text-4xl font-bold flex items-center justify-center gap-1" style={{ color: selectedKid.color }}>
                           <Star className="w-8 h-8" filled />
-                          {stats.total}
+                          {stats.total % 1 === 0 ? stats.total : stats.total.toFixed(1)}
                         </div>
                       </div>
                       <div className="bg-blue-100 rounded-2xl p-4 text-center">
                         <div className="text-sm font-semibold text-gray-700 mb-1">Today</div>
-                        <div className="text-4xl font-bold text-blue-600">{stats.today}</div>
+                        <div className="text-4xl font-bold text-blue-600">
+                          {stats.today % 1 === 0 ? stats.today : stats.today.toFixed(1)}
+                        </div>
                       </div>
                       <div className="bg-purple-100 rounded-2xl p-4 text-center">
                         <div className="text-sm font-semibold text-gray-700 mb-1">This Week</div>
-                        <div className="text-4xl font-bold text-purple-600">{stats.thisWeek}</div>
+                        <div className="text-4xl font-bold text-purple-600">
+                          {stats.thisWeek % 1 === 0 ? stats.thisWeek : stats.thisWeek.toFixed(1)}
+                        </div>
                       </div>
                     </>
                   );
                 })()}
               </div>
+
+              {/* Rewards Display */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-4 border-2 border-green-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-green-700 text-sm font-semibold mb-1">📜 Certificates</div>
+                      <div className="text-3xl font-bold text-green-600">
+                        {rewards[selectedKid.id]?.certificates || 0}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-4 border-2 border-pink-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-pink-700 text-sm font-semibold mb-1">💎 Diamonds</div>
+                      <div className="text-3xl font-bold text-pink-600">
+                        {rewards[selectedKid.id]?.diamonds || 0}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowRedemptionModal(true)}
+                className="w-full mt-4 py-3 rounded-2xl font-bold text-white transition-all hover:scale-105 flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}
+              >
+                <Gift className="w-6 h-6" />
+                Redeem Stars for Rewards
+              </button>
             </div>
 
             {/* Calendar */}
@@ -607,7 +875,7 @@
                         <div className="flex items-center gap-1 mt-1">
                           <Star className="w-4 h-4 sparkle" style={{ color: selectedKid.color }} filled />
                           <span className="text-xs font-bold" style={{ color: selectedKid.color }}>
-                            {starCount}
+                            {starCount % 1 === 0 ? starCount : starCount.toFixed(1)}
                           </span>
                         </div>
                       )}
@@ -638,7 +906,22 @@
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                  {categories.map(category => {
+                  {categories
+                    .filter(cat => {
+                      // Check if category is meant for this kid or all kids
+                      const isForThisKid = cat.forKid === 'all' || cat.forKid === selectedKid.id;
+                      if (!isForThisKid) return false;
+                      
+                      // Check if it's a default category and if it's enabled for this kid
+                      const isDefaultCategory = DEFAULT_CATEGORIES.some(def => def.id === cat.id);
+                      if (isDefaultCategory) {
+                        return isCategoryEnabledForKid(cat.id, selectedKid.id);
+                      }
+                      
+                      // Custom categories are always shown
+                      return true;
+                    })
+                    .map(category => {
                     const earned = stars[selectedKid.id]?.[selectedDate]?.[category.id];
                     
                     return (
@@ -658,7 +941,10 @@
                             <div className="text-3xl mb-2">{category.emoji}</div>
                             <div>{category.name}</div>
                           </div>
-                          {earned && (
+                          {earned === 0.5 && (
+                            <HalfStar className="w-10 h-10 text-white star-pop" />
+                          )}
+                          {(earned === 1 || earned === true) && (
                             <Star className="w-10 h-10 text-white star-pop" filled />
                           )}
                         </div>
@@ -682,24 +968,383 @@
                 {/* Add Custom Category */}
                 <div className="border-t-2 border-gray-200 pt-6">
                   <h4 className="font-bold text-lg mb-4 text-gray-700">Add Custom Category</h4>
-                  <div className="flex gap-3">
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-semibold text-gray-600 mb-2">
+                      Category Name
+                    </label>
                     <input
                       type="text"
                       value={newCategoryName}
                       onChange={(e) => setNewCategoryName(e.target.value)}
-                      placeholder="Category name..."
-                      className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-2xl focus:border-purple-500 focus:outline-none"
+                      placeholder="e.g., Swimming Practice"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:border-purple-500 focus:outline-none"
                       onKeyPress={(e) => e.key === 'Enter' && addCustomCategory()}
                     />
-                    <button
-                      onClick={addCustomCategory}
-                      className="px-6 py-3 rounded-2xl text-white font-semibold flex items-center gap-2 transition-all hover:scale-105"
-                      style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
-                    >
-                      <Plus className="w-5 h-5" />
-                      Add
-                    </button>
                   </div>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-semibold text-gray-600 mb-2">
+                      Available For
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => setNewCategoryForKid('all')}
+                        className={`py-3 px-4 rounded-xl font-semibold transition-all ${
+                          newCategoryForKid === 'all'
+                            ? 'bg-purple-500 text-white shadow-lg scale-105'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        Both Kids
+                      </button>
+                      <button
+                        onClick={() => setNewCategoryForKid('kid1')}
+                        className={`py-3 px-4 rounded-xl font-semibold transition-all ${
+                          newCategoryForKid === 'kid1'
+                            ? 'bg-purple-500 text-white shadow-lg scale-105'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {kids[0]?.name || 'Kid 1'}
+                      </button>
+                      <button
+                        onClick={() => setNewCategoryForKid('kid2')}
+                        className={`py-3 px-4 rounded-xl font-semibold transition-all ${
+                          newCategoryForKid === 'kid2'
+                            ? 'bg-purple-500 text-white shadow-lg scale-105'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {kids[1]?.name || 'Kid 2'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={addCustomCategory}
+                    className="w-full px-6 py-3 rounded-2xl text-white font-semibold flex items-center justify-center gap-2 transition-all hover:scale-105"
+                    style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+                  >
+                    <Plus className="w-5 h-5" />
+                    Add Category
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Rewards Settings Modal */}
+          {showRewardsModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-3xl p-6 max-w-md w-full slide-up">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-purple-600" style={{ fontFamily: "'Fredoka', sans-serif" }}>
+                    ⚙️ Rewards Settings
+                  </h3>
+                  <button
+                    onClick={() => setShowRewardsModal(false)}
+                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <X className="w-6 h-6 text-gray-600" />
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      📜 Stars needed for 1 Certificate
+                    </label>
+                    <input
+                      type="number"
+                      value={starsPerCertificate}
+                      onChange={(e) => setStarsPerCertificate(parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:border-green-500 focus:outline-none text-lg font-bold text-center"
+                      min="1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      💎 Stars needed for 1 Diamond
+                    </label>
+                    <input
+                      type="number"
+                      value={starsPerDiamond}
+                      onChange={(e) => setStarsPerDiamond(parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:border-pink-500 focus:outline-none text-lg font-bold text-center"
+                      min="1"
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => setShowRewardsModal(false)}
+                    className="w-full py-3 rounded-2xl text-white font-bold text-lg transition-all hover:scale-105"
+                    style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+                  >
+                    Save Settings
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Redemption Modal */}
+          {showRedemptionModal && selectedKid && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-3xl p-6 max-w-md w-full slide-up">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold" style={{ 
+                    fontFamily: "'Fredoka', sans-serif",
+                    color: selectedKid.color 
+                  }}>
+                    🎁 Redeem Rewards
+                  </h3>
+                  <button
+                    onClick={() => setShowRedemptionModal(false)}
+                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <X className="w-6 h-6 text-gray-600" />
+                  </button>
+                </div>
+
+                <div className="mb-6 bg-yellow-50 rounded-2xl p-4 border-2 border-yellow-200">
+                  <div className="text-center">
+                    <div className="text-gray-600 text-sm font-semibold mb-1">Available Stars</div>
+                    <div className="text-5xl font-bold flex items-center justify-center gap-2" style={{ color: selectedKid.color }}>
+                      <Star className="w-12 h-12" filled />
+                      {(() => {
+                        const total = getStarsForKid(selectedKid.id).total;
+                        return total % 1 === 0 ? total : total.toFixed(1);
+                      })()}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <button
+                    onClick={() => {
+                      redeemReward(selectedKid.id, 'certificate');
+                      setShowRedemptionModal(false);
+                    }}
+                    className="w-full p-6 rounded-2xl bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 hover:border-green-400 transition-all hover:scale-105"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-left">
+                        <div className="text-3xl mb-2">📜</div>
+                        <div className="font-bold text-xl text-green-700">Certificate</div>
+                        <div className="text-sm text-gray-600">
+                          Cost: {starsPerCertificate} ⭐
+                        </div>
+                      </div>
+                      <Award className="w-12 h-12 text-green-600" />
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      redeemReward(selectedKid.id, 'diamond');
+                      setShowRedemptionModal(false);
+                    }}
+                    className="w-full p-6 rounded-2xl bg-gradient-to-r from-pink-100 to-rose-100 border-2 border-pink-300 hover:border-pink-400 transition-all hover:scale-105"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-left">
+                        <div className="text-3xl mb-2">💎</div>
+                        <div className="font-bold text-xl text-pink-700">Diamond</div>
+                        <div className="text-sm text-gray-600">
+                          Cost: {starsPerDiamond} ⭐
+                        </div>
+                      </div>
+                      <Gift className="w-12 h-12 text-pink-600" />
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Manage Categories Modal */}
+          {showManageCategoriesModal && selectedKid && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto slide-up">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold" style={{ 
+                    fontFamily: "'Fredoka', sans-serif",
+                    color: selectedKid.color 
+                  }}>
+                    Manage Categories for {selectedKid.name}
+                  </h3>
+                  <button
+                    onClick={() => setShowManageCategoriesModal(false)}
+                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <X className="w-6 h-6 text-gray-600" />
+                  </button>
+                </div>
+
+                <p className="text-gray-600 mb-6">
+                  Toggle categories on/off. Disabled categories won't appear when tracking stars.
+                </p>
+
+                <h4 className="font-bold text-lg mb-3 text-gray-700">Built-in Categories</h4>
+                <div className="space-y-3 mb-6">
+                  {DEFAULT_CATEGORIES
+                    .filter(cat => cat.forKid === 'all' || cat.forKid === selectedKid.id)
+                    .map(category => {
+                      const isEnabled = isCategoryEnabledForKid(category.id, selectedKid.id);
+                      
+                      return (
+                        <button
+                          key={category.id}
+                          onClick={() => toggleCategoryForKid(category.id, selectedKid.id)}
+                          className="w-full p-4 rounded-2xl border-2 transition-all flex items-center justify-between"
+                          style={{
+                            background: isEnabled 
+                              ? `linear-gradient(135deg, ${category.color}20, ${category.color}40)`
+                              : '#f8f9fa',
+                            borderColor: isEnabled ? category.color : '#e5e7eb'
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="text-3xl">{category.emoji}</div>
+                            <div className="text-left">
+                              <div className="font-semibold text-lg">{category.name}</div>
+                              <div className="text-sm text-gray-600">
+                                {isEnabled ? 'Enabled' : 'Disabled'}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className={`w-14 h-8 rounded-full transition-all ${
+                            isEnabled ? 'bg-green-500' : 'bg-gray-300'
+                          } relative`}>
+                            <div className={`absolute top-1 w-6 h-6 rounded-full bg-white transition-all ${
+                              isEnabled ? 'right-1' : 'left-1'
+                            }`} />
+                          </div>
+                        </button>
+                      );
+                    })}
+                </div>
+
+                {/* Custom Categories Section */}
+                {categories.filter(cat => 
+                  !DEFAULT_CATEGORIES.some(def => def.id === cat.id) && 
+                  (cat.forKid === 'all' || cat.forKid === selectedKid.id)
+                ).length > 0 && (
+                  <>
+                    <h4 className="font-bold text-lg mb-3 text-gray-700">Custom Categories</h4>
+                    <div className="space-y-3">
+                      {categories
+                        .filter(cat => 
+                          !DEFAULT_CATEGORIES.some(def => def.id === cat.id) && 
+                          (cat.forKid === 'all' || cat.forKid === selectedKid.id)
+                        )
+                        .map(category => (
+                          <div
+                            key={category.id}
+                            className="w-full p-4 rounded-2xl border-2 transition-all flex items-center justify-between"
+                            style={{
+                              background: `linear-gradient(135deg, ${category.color}20, ${category.color}40)`,
+                              borderColor: category.color
+                            }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="text-3xl">{category.emoji}</div>
+                              <div className="text-left">
+                                <div className="font-semibold text-lg">{category.name}</div>
+                                <div className="text-sm text-gray-600">
+                                  {category.forKid === 'all' ? 'For both kids' : 'Kid-specific'}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <button
+                              onClick={() => deleteCategory(category.id)}
+                              className="p-2 bg-red-500 hover:bg-red-600 rounded-xl transition-colors"
+                            >
+                              <Trash className="w-5 h-5 text-white" />
+                            </button>
+                          </div>
+                        ))}
+                    </div>
+                  </>
+                )}
+
+                <div className="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl">
+                  <p className="text-sm text-blue-800">
+                    💡 Tip: You can also add custom categories for special occasions when clicking on a date!
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Edit Kid Modal */}
+          {showEditKidModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-3xl p-6 max-w-md w-full slide-up">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold" style={{ 
+                    fontFamily: "'Fredoka', sans-serif",
+                    color: editingKid?.color 
+                  }}>
+                    Edit Kid Profile
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setShowEditKidModal(false);
+                      setEditingKid(null);
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <X className="w-6 h-6 text-gray-600" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      value={editKidName}
+                      onChange={(e) => setEditKidName(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:border-purple-500 focus:outline-none text-lg"
+                      placeholder="Kid's name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Avatar (emoji)
+                    </label>
+                    <div className="flex gap-3">
+                      {['👧', '👦', '🧒', '👶', '🧑', '😊', '🌟', '⭐'].map(emoji => (
+                        <button
+                          key={emoji}
+                          onClick={() => setEditKidAvatar(emoji)}
+                          className={`text-4xl p-3 rounded-2xl transition-all ${
+                            editKidAvatar === emoji 
+                              ? 'bg-purple-100 scale-110' 
+                              : 'bg-gray-100 hover:bg-gray-200'
+                          }`}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={saveKidEdit}
+                    className="w-full py-3 rounded-2xl text-white font-bold text-lg transition-all hover:scale-105"
+                    style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+                  >
+                    Save Changes
+                  </button>
                 </div>
               </div>
             </div>
