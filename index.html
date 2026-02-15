@@ -130,13 +130,13 @@
   <script>
     // ⚠️ PASTE YOUR FIREBASE CONFIG HERE
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      databaseURL: "YOUR_DATABASE_URL",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+        apiKey: "AIzaSyDLxCEmP3RchhEwjRULu0ELMg_iLItBfkw",
+  authDomain: "class-tracker-7ec05.firebaseapp.com",
+  databaseURL: "https://class-tracker-7ec05-default-rtdb.firebaseio.com",
+  projectId: "class-tracker-7ec05",
+  storageBucket: "class-tracker-7ec05.firebasestorage.app",
+  messagingSenderId: "34124797425",
+  appId: "1:34124797425:web:9d92e45482eb27cff6e050"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -639,7 +639,7 @@
 
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   {categories.map(category => {
-                    const hasStarconst earned = stars[selectedKid.id]?.[selectedDate]?.[category.id];
+                    const earned = stars[selectedKid.id]?.[selectedDate]?.[category.id];
                     
                     return (
                       <button
