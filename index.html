@@ -130,7 +130,7 @@
   <script>
     // ⚠️ PASTE YOUR FIREBASE CONFIG HERE
     const firebaseConfig = {
-        apiKey: "AIzaSyDLxCEmP3RchhEwjRULu0ELMg_iLItBfkw",
+       apiKey: "AIzaSyDLxCEmP3RchhEwjRULu0ELMg_iLItBfkw",
   authDomain: "class-tracker-7ec05.firebaseapp.com",
   databaseURL: "https://class-tracker-7ec05-default-rtdb.firebaseio.com",
   projectId: "class-tracker-7ec05",
@@ -323,10 +323,7 @@
     }
 
     function StarTracker({ user, onLogout }) {
-      const [kids, setKids] = useState([
-        { id: 'kid1', name: 'Kid 1', color: '#FF6B9D', avatar: '👧' },
-        { id: 'kid2', name: 'Kid 2', color: '#4ECDC4', avatar: '👦' }
-      ]);
+      const [kids, setKids] = useState([]);
       const [selectedKid, setSelectedKid] = useState(null);
       const [stars, setStars] = useState({}); // { kid1: { '2026-02-15': { homework: true, chores: true } } }
       const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -353,8 +350,21 @@
       useEffect(() => {
         const listener = dataRef.on('value', (snapshot) => {
           const data = snapshot.val();
+          
+          // Initialize default kids if no data exists at all
+          if (!data || !data.kids) {
+            const defaultKids = [
+              { id: 'kid1', name: 'Kid 1', color: '#FF6B9D', avatar: '👧' },
+              { id: 'kid2', name: 'Kid 2', color: '#4ECDC4', avatar: '👦' }
+            ];
+            setKids(defaultKids);
+          }
+          
           if (data) {
-            if (data.kids) setKids(data.kids);
+            // Load kids data from Firebase - this will override the default
+            if (data.kids && Array.isArray(data.kids) && data.kids.length === 2) {
+              setKids(data.kids);
+            }
             if (data.stars) setStars(data.stars);
             
             // Always include default categories, plus any custom ones from Firebase
@@ -375,6 +385,11 @@
           setIsLoading(false);
         }, (error) => {
           console.error('Firebase read error:', error);
+          // Even on error, set default kids so app doesn't break
+          setKids([
+            { id: 'kid1', name: 'Kid 1', color: '#FF6B9D', avatar: '👧' },
+            { id: 'kid2', name: 'Kid 2', color: '#4ECDC4', avatar: '👦' }
+          ]);
           setIsLoading(false);
         });
 
@@ -561,10 +576,13 @@
       const getStarsForKid = (kidId) => {
         if (!stars[kidId]) return { total: 0, today: 0, thisWeek: 0 };
         
-        const today = new Date().toISOString().split('T')[0];
+        // Use local timezone instead of UTC
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        
         const startOfWeek = new Date();
         startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-        const weekStart = startOfWeek.toISOString().split('T')[0];
+        const weekStart = `${startOfWeek.getFullYear()}-${String(startOfWeek.getMonth() + 1).padStart(2, '0')}-${String(startOfWeek.getDate()).padStart(2, '0')}`;
         
         let total = 0;
         let todayCount = 0;
@@ -613,6 +631,29 @@
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
           }}>
             <div className="text-white text-2xl font-bold">Loading...</div>
+          </div>
+        );
+      }
+
+      // Safety check - if kids data is empty or invalid, show error
+      if (!kids || kids.length !== 2) {
+        return (
+          <div className="min-h-screen flex items-center justify-center p-4" style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+          }}>
+            <div className="bg-white rounded-3xl p-8 max-w-md text-center">
+              <div className="text-6xl mb-4">⚠️</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Loading Error</h2>
+              <p className="text-gray-600 mb-4">
+                Unable to load kids data. Please refresh the page.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl"
+              >
+                Refresh Page
+              </button>
+            </div>
           </div>
         );
       }
